@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model Product {
+  id                 Int              @id @default(autoincrement())
+  category           Category
+  productType        String
+  model              String
+  manufacturer       String
+  originCountries    String[]
+  description        String
+  price              Float
+  discount           Float
+  weight             Weight           @relation(fields: [weightId], references: [id])
+  weightId           Int              @unique
+  color              String
+  images             Image[]
+  advantages         Advantage[]
+  specs              Spec[]
+  files              File[]
+  accessories        Accessory[]
+  transportationData Transportation[]
+}
+
+model Weight {
+  id              Int      @id @default(autoincrement())
+  value           Int
+  measurementUnit String
+  product         Product?
+}
+
+model Advantage {
+  id        Int     @id @default(autoincrement())
+  title     String
+  content   String
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+}
+
+model Spec {
+  id              Int     @id @default(autoincrement())
+  spec            String
+  value           String
+  measurementUnit String?
+  product         Product @relation(fields: [productId], references: [id])
+  productId       Int
+}
+
+model File {
+  id        Int     @id @default(autoincrement())
+  label     String
+  url       String
+  image     Image?  @relation(fields: [imageId], references: [id])
+  imageId   Int     @unique
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+}
+
+model Accessory {
+  id        Int     @id @default(autoincrement())
+  name      String
+  quantity  Int?
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+}
+
+model Transportation {
+  id              Int     @id @default(autoincrement())
+  name            String
+  value           String
+  measurementUnit String?
+  product         Product @relation(fields: [productId], references: [id])
+  productId       Int
+}
+
+model Contact {
+  id          Int    @id @default(autoincrement())
+  label       String
+  address     String
+  phoneNumber String
+  email       String
+}
+
+model BusinessPremiseContact {
+  id                    Int                    @id @default(autoincrement())
+  label                 String
+  image                 Image                  @relation(fields: [imageId], references: [id])
+  imageId               Int                    @unique
+  address               String
+  phoneNumber           String
+  email                 String?
+  orderPassPhoneNumbers OrderPassPhoneNumber[]
+}
+
+model OrderPassPhoneNumber {
+  id                       Int                    @id @default(autoincrement())
+  phoneNumber              String
+  businessPremiseContact   BusinessPremiseContact @relation(fields: [businessPremiseContactId], references: [id])
+  businessPremiseContactId Int
+}
+
+model DepartmentContact {
+  id                    Int                    @id @default(autoincrement())
+  label                 String
+  address               String
+  phoneNumber           String
+  email                 String
+  extensionPhoneNumbers ExtensionPhoneNumber[]
+}
+
+model ExtensionPhoneNumber {
+  id                  Int               @id @default(autoincrement())
+  phoneNumber         String
+  departmentContact   DepartmentContact @relation(fields: [departmentContactId], references: [id])
+  departmentContactId Int
+}
+
+model DeliveryOption {
+  id          Int    @id @default(autoincrement())
+  type        String
+  label       String
+  price       Int
+  description String
+}
+
+model License {
+  id      Int    @id @default(autoincrement())
+  title   String
+  image   Image  @relation(fields: [imageId], references: [id])
+  imageId Int    @unique
+}
+
+model NewsItem {
+  id      Int      @id @default(autoincrement())
+  title   String
+  date    DateTime
+  images  Image[]
+  content String
+}
+
+model Tax {
+  id    Int    @id @default(autoincrement())
+  type  String
+  value Float
+}
+
+model Image {
+  id                     Int                     @id @default(autoincrement())
+  url                    String
+  priority               Int
+  product                Product?                @relation(fields: [productId], references: [id])
+  productId              Int?
+  file                   File?
+  license                License?
+  businessPremiseContact BusinessPremiseContact?
+  newsItem               NewsItem?               @relation(fields: [newsItemId], references: [id])
+  newsItemId             Int?
+}
+
+enum Category {
+  ANALYTICAL_EQUIPMENT
+  BIOCHEMISTRY_BIOTECHNOLOGY
+  CLINIC_DIAGNOSTICS
+  CONSUMABLES
+  COSMECEUTICALS
+  LAB_EQUIPMENT
+  LIFE_SCIENCE_EQUIPMENT
+  MICROELECTRONICS
+  PHARMACEUTICALS
+  REAGENTS_STANDARTS
+  SPECIAL_OFFERS
+  SUPPLIERS
+  VETERINARY
+  WAREHOUSE
+}
