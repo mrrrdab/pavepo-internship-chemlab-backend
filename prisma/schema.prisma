@@ -18,30 +18,22 @@ model Product {
   description        String
   price              Float
   discount           Float
-  weight             Weight           @relation(fields: [weightId], references: [id])
-  weightId           Int              @unique
+  weight             Float            
   color              String
-  images             Image[]
-  advantages         Advantage[]
-  specs              Spec[]
-  files              File[]
   accessories        Accessory[]
+  advantages         Advantage[]
+  files              File[]
+  images             Image[]
+  specs              Spec[]
   transportationData Transportation[]
-}
-
-model Weight {
-  id              Int      @id @default(autoincrement())
-  value           Int
-  measurementUnit String
-  product         Product?
 }
 
 model Advantage {
   id        Int     @id @default(autoincrement())
   title     String
   content   String
-  product   Product @relation(fields: [productId], references: [id])
   productId Int
+  product   Product @relation(fields: [productId], references: [id])
 }
 
 model Spec {
@@ -49,26 +41,26 @@ model Spec {
   spec            String
   value           String
   measurementUnit String?
-  product         Product @relation(fields: [productId], references: [id])
   productId       Int
+  product         Product @relation(fields: [productId], references: [id])
 }
 
 model File {
   id        Int     @id @default(autoincrement())
   label     String
   url       String
-  image     Image?  @relation(fields: [imageId], references: [id])
   imageId   Int     @unique
-  product   Product @relation(fields: [productId], references: [id])
   productId Int
+  image     Image   @relation(fields: [imageId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 }
 
 model Accessory {
   id        Int     @id @default(autoincrement())
   name      String
   quantity  Int?
-  product   Product @relation(fields: [productId], references: [id])
   productId Int
+  product   Product @relation(fields: [productId], references: [id])
 }
 
 model Transportation {
@@ -76,40 +68,31 @@ model Transportation {
   name            String
   value           String
   measurementUnit String?
-  product         Product @relation(fields: [productId], references: [id])
   productId       Int
-}
-
-model Contact {
-  id          Int    @id @default(autoincrement())
-  label       String
-  address     String
-  phoneNumber String
-  email       String
+  product         Product @relation(fields: [productId], references: [id])
 }
 
 model BusinessPremiseContact {
   id                    Int                    @id @default(autoincrement())
   label                 String
-  image                 Image                  @relation(fields: [imageId], references: [id])
   imageId               Int                    @unique
   address               String
   phoneNumber           String
   email                 String?
+  image                 Image                  @relation(fields: [imageId], references: [id])
   orderPassPhoneNumbers OrderPassPhoneNumber[]
 }
 
 model OrderPassPhoneNumber {
   id                       Int                    @id @default(autoincrement())
   phoneNumber              String
-  businessPremiseContact   BusinessPremiseContact @relation(fields: [businessPremiseContactId], references: [id])
   businessPremiseContactId Int
+  businessPremiseContact   BusinessPremiseContact @relation(fields: [businessPremiseContactId], references: [id])
 }
 
 model DepartmentContact {
   id                    Int                    @id @default(autoincrement())
   label                 String
-  address               String
   phoneNumber           String
   email                 String
   extensionPhoneNumbers ExtensionPhoneNumber[]
@@ -118,31 +101,23 @@ model DepartmentContact {
 model ExtensionPhoneNumber {
   id                  Int               @id @default(autoincrement())
   phoneNumber         String
-  departmentContact   DepartmentContact @relation(fields: [departmentContactId], references: [id])
   departmentContactId Int
+  departmentContact   DepartmentContact @relation(fields: [departmentContactId], references: [id])
 }
 
 model DeliveryOption {
   id          Int    @id @default(autoincrement())
   type        String
   label       String
-  price       Int
+  price       Float
   description String
 }
 
 model License {
   id      Int    @id @default(autoincrement())
   title   String
-  image   Image  @relation(fields: [imageId], references: [id])
   imageId Int    @unique
-}
-
-model NewsItem {
-  id      Int      @id @default(autoincrement())
-  title   String
-  date    DateTime
-  images  Image[]
-  content String
+  image   Image  @relation(fields: [imageId], references: [id])
 }
 
 model Tax {
@@ -154,14 +129,30 @@ model Tax {
 model Image {
   id                     Int                     @id @default(autoincrement())
   url                    String
-  priority               Int
-  product                Product?                @relation(fields: [productId], references: [id])
+  priority               Int?
   productId              Int?
-  file                   File?
-  license                License?
-  businessPremiseContact BusinessPremiseContact?
-  newsItem               NewsItem?               @relation(fields: [newsItemId], references: [id])
   newsItemId             Int?
+  businessPremiseContact BusinessPremiseContact?
+  file                   File?
+  newsItem               News?                   @relation(fields: [newsItemId], references: [id])
+  product                Product?                @relation(fields: [productId], references: [id])
+  license                License?
+}
+
+model PrimaryContact {
+  id          Int    @id(map: "Contact_pkey") @default(autoincrement())
+  label       String
+  address     String
+  phoneNumber String
+  email       String
+}
+
+model News {
+  id      Int      @id(map: "NewsItem_pkey") @default(autoincrement())
+  title   String
+  date    DateTime
+  content String
+  images  Image[]
 }
 
 enum Category {
