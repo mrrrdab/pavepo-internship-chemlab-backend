@@ -7,10 +7,11 @@
   "license": "UNLICENSED",
   "rootDir": "src",
   "scripts": {
-    "build": "nest build",
+    "build": "npx prisma generate && nest build",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
+    "postinstall": "npx prisma generate",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "migrate": "npx prisma migrate dev"
   },
