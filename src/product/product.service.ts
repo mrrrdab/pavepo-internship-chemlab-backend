@@ -1,10 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Accessory, Advantage, File, Image, Prisma, Product, Spec, Transportation } from '@prisma/client';
 
-import { PrismaService } from 'src/prisma.service';
-import { CATEGORIES } from 'src/constants';
-import { Metadata, PaginationQueryParams, ResponseData } from 'src/common';
-
+import { PrismaService } from '../prisma.service';
+import { CATEGORIES } from '../constants';
+import { Metadata, PaginationQueryParams, ResponseData } from '../common';
 import { AggregatedInfoDTO, GetProductDTO, GetProductsQueryParams } from './dto';
 
 @Injectable()

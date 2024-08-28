@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Tax } from '@prisma/client';
 
-import { PrismaService } from 'src/prisma.service';
-import { Metadata, ResponseData } from 'src/common';
-
-import { GetTaxDTO } from './dto/tax.dto';
+import { PrismaService } from '../prisma.service';
+import { Metadata, ResponseData } from '../common';
+import { GetTaxDTO } from './dto';
 
 @Injectable()
 export class TaxService {

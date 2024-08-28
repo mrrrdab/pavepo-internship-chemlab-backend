@@ -8,9 +8,8 @@ import {
   OrderPassPhoneNumber,
 } from '@prisma/client';
 
-import { PrismaService } from 'src/prisma.service';
-import { Metadata, ResponseData } from 'src/common';
-
+import { Metadata, ResponseData } from '../common';
+import { PrismaService } from '../prisma.service';
 import { GetBusinessPremiseContactDTO, GetDepartmentContactDTO, GetPrimaryContactDTO } from './dto';
 
 @Injectable()

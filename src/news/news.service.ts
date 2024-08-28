@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Image, News } from '@prisma/client';
 
-import { PrismaService } from 'src/prisma.service';
-import { Metadata, ResponseData } from 'src/common';
-
+import { PrismaService } from '../prisma.service';
+import { Metadata, ResponseData } from '../common';
 import { GetNewsDTO } from './dto';
 
 @Injectable()

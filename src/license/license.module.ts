@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { PrismaService } from 'src/prisma.service';
-
+import { PrismaService } from '../prisma.service';
 import { LicenseController } from './license.controller';
 import { LicenseService } from './license.service';
 

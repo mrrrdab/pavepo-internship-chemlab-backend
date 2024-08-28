@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { DeliveryOption } from '@prisma/client';
 
-import { PrismaService } from 'src/prisma.service';
-import { Metadata, ResponseData } from 'src/common';
-
+import { PrismaService } from '../prisma.service';
+import { Metadata, ResponseData } from '../common';
 import { GetDeliveryOptionDTO } from './dto';
 
 @Injectable()

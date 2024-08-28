@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Image, License } from '@prisma/client';
 
-import { PrismaService } from 'src/prisma.service';
-import { Metadata, PaginationQueryParams, ResponseData } from 'src/common';
-
+import { PrismaService } from '../prisma.service';
+import { Metadata, PaginationQueryParams, ResponseData } from '../common';
 import { GetLicenseDTO } from './dto';
 
 @Injectable()
