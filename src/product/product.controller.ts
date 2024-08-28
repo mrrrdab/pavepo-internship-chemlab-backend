@@ -1,7 +1,6 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 
-import { Metadata, PaginationQueryParams, ResponseData } from 'src/common';
-
+import { Metadata, PaginationQueryParams, ResponseData } from '../common';
 import { ProductService } from './product.service';
 import { AggregatedInfoDTO, GetProductDTO, GetProductsQueryParams } from './dto';
 

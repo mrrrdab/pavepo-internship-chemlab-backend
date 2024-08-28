@@ -1,7 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 
-import { Metadata, ResponseData } from 'src/common';
-
+import { Metadata, ResponseData } from '../common';
 import { ContactService } from './contact.service';
 import { GetBusinessPremiseContactDTO, GetDepartmentContactDTO, GetPrimaryContactDTO } from './dto';
 

@@ -1,7 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 
-import { Metadata, PaginationQueryParams, ResponseData } from 'src/common';
-
+import { Metadata, PaginationQueryParams, ResponseData } from '../common';
 import { LicenseService } from './license.service';
 import { GetLicenseDTO } from './dto';
 

@@ -1,4 +1,4 @@
-import { ImageDTO } from 'src/common';
+import { ImageDTO } from '../../common';
 
 class LicenseDTO {
   readonly id: number;

@@ -2,7 +2,7 @@ import { IntersectionType, PartialType } from '@nestjs/mapped-types';
 import { Category } from '@prisma/client';
 import { IsNumber, IsOptional } from 'class-validator';
 
-import { ImageDTO, PaginationQueryParams } from 'src/common';
+import { ImageDTO, PaginationQueryParams } from '../../common';
 
 class ProductDTO {
   readonly id: number;

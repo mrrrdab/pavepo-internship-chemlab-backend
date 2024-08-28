@@ -1,7 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 
-import { Metadata, ResponseData } from 'src/common';
-
+import { Metadata, ResponseData } from '../common';
 import { NewsService } from './news.service';
 import { GetNewsDTO } from './dto';
 
