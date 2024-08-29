@@ -2,7 +2,7 @@ import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 
 import { Metadata, PaginationQueryParams, ResponseData } from '../common';
 import { ProductService } from './product.service';
-import { AggregatedInfoDTO, GetProductDTO, GetProductsQueryParams } from './dto';
+import { AggregatedInfoDTO, GetAggregatedInfoQueryParams, GetProductDTO, GetProductsQueryParams } from './dto';
 
 @Controller('api/products')
 export class ProductController {
@@ -14,8 +14,8 @@ export class ProductController {
   }
 
   @Get('aggregated-info')
-  async getAggregatedInfo(): Promise<ResponseData<AggregatedInfoDTO>> {
-    return await this.productService.getAggregatedInfo();
+  async getAggregatedInfo(@Query() params: GetAggregatedInfoQueryParams): Promise<ResponseData<AggregatedInfoDTO>> {
+    return await this.productService.getAggregatedInfo(params);
   }
 
   @Get(':id')

@@ -4,7 +4,7 @@ import { Accessory, Advantage, File, Image, Prisma, Product, Spec, Transportatio
 import { PrismaService } from '../prisma.service';
 import { CATEGORIES } from '../constants';
 import { Metadata, PaginationQueryParams, ResponseData } from '../common';
-import { AggregatedInfoDTO, GetProductDTO, GetProductsQueryParams } from './dto';
+import { AggregatedInfoDTO, GetAggregatedInfoQueryParams, GetProductDTO, GetProductsQueryParams } from './dto';
 
 @Injectable()
 export class ProductService {
@@ -42,8 +42,11 @@ export class ProductService {
     return { data, metadata: { totalCount } };
   }
 
-  async getAggregatedInfo(): Promise<ResponseData<AggregatedInfoDTO>> {
+  async getAggregatedInfo(params: GetAggregatedInfoQueryParams): Promise<ResponseData<AggregatedInfoDTO>> {
     const products = await this.prismaService.product.findMany({
+      where: {
+        category: CATEGORIES[params.category],
+      },
       select: {
         manufacturer: true,
         weight: true,

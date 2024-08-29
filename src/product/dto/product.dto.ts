@@ -96,3 +96,7 @@ export class GetProductsQueryParams extends IntersectionType(
   PartialType(ProductFiltersQueryParams),
   PaginationQueryParams,
 ) {}
+
+export class GetAggregatedInfoQueryParams {
+  category: Category;
+}
