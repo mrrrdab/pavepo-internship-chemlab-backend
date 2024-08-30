@@ -1,6 +1,6 @@
 import { IntersectionType, PartialType } from '@nestjs/mapped-types';
+import { IsNumber, IsString } from 'class-validator';
 import { Category } from '@prisma/client';
-import { IsNumber, IsOptional } from 'class-validator';
 
 import { ImageDTO, PaginationQueryParams } from '../../common';
 
@@ -71,22 +71,17 @@ export class AggregatedInfoDTO {
 
 export class ProductFiltersQueryParams {
   readonly category: Category;
-
-  @IsOptional()
-  @IsNumber()
+  readonly productType: string;
+  readonly model: string;
   readonly priceMin: number;
 
-  @IsOptional()
   @IsNumber()
   readonly priceMax: number;
-
   readonly manufacturer: string;
 
-  @IsOptional()
   @IsNumber()
   readonly weightMin: number;
 
-  @IsOptional()
   @IsNumber()
   readonly weightMax: number;
   readonly colors: string[];

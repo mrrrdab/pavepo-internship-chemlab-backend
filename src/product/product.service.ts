@@ -100,15 +100,29 @@ export class ProductService {
       whereConditions.category = CATEGORIES[params.category];
     }
 
-    if (params.priceMin !== undefined && params.priceMax !== undefined) {
-      whereConditions.price = {
-        gte: params.priceMin,
-        lte: params.priceMax,
+    if (params.productType) {
+      whereConditions.productType = {
+        startsWith: params.productType,
+        mode: 'insensitive',
+      };
+    }
+
+    if (params.model) {
+      whereConditions.model = {
+        contains: params.model,
+        mode: 'insensitive',
       };
     }
 
     if (params.manufacturer) {
       whereConditions.manufacturer = params.manufacturer;
+    }
+
+    if (params.priceMin !== undefined && params.priceMax !== undefined) {
+      whereConditions.price = {
+        gte: params.priceMin,
+        lte: params.priceMax,
+      };
     }
 
     if (params.weightMin !== undefined && params.weightMax !== undefined) {
