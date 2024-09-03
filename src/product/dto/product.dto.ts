@@ -1,8 +1,8 @@
 import { IntersectionType, PartialType } from '@nestjs/mapped-types';
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber } from 'class-validator';
 import { Category } from '@prisma/client';
 
-import { ImageDTO, PaginationQueryParams } from '../../common';
+import { PaginationQueryParams } from '../../common';
 
 class ProductDTO {
   readonly id: number;
@@ -26,9 +26,15 @@ class ProductDTO {
 
 export class GetProductDTO extends ProductDTO {}
 
+export class ImageDTO {
+  readonly id: number;
+  readonly url: string;
+  readonly priority?: number;
+}
+
 export class AdvantageDTO {
   readonly id: number;
-  readonly title: string;
+  readonly label: string;
   readonly content: string;
 }
 
@@ -41,9 +47,9 @@ export class SpecDTO {
 
 export class FileDTO {
   readonly id: number;
-  readonly label: string;
+  readonly title: string;
   readonly url: string;
-  readonly image: ImageDTO;
+  readonly preview: ImageDTO;
 }
 
 export class AccessoryDTO {

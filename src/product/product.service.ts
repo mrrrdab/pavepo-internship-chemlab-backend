@@ -1,224 +1,253 @@
+/* eslint-disable max-len */
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Accessory, Advantage, File, Image, Prisma, Product, Spec, Transportation } from '@prisma/client';
 
-import { PrismaService } from '../prisma.service';
-import { CATEGORIES } from '../constants';
+import { CATEGORIES } from 'src/constants';
+
 import { Metadata, PaginationQueryParams, ResponseData } from '../common';
 import { AggregatedInfoDTO, GetAggregatedInfoQueryParams, GetProductDTO, GetProductsQueryParams } from './dto';
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly prismaService: PrismaService) {}
-
-  async getSpecialOffers(params: PaginationQueryParams): Promise<ResponseData<GetProductDTO[]> & Metadata> {
-    const products = await this.prismaService.product.findMany({
-      where: {
-        discount: {
-          gt: 0,
-        },
-      },
-      skip: params.skip,
-      take: params.take,
-      include: {
-        images: true,
-        advantages: true,
-        specs: true,
-        files: { include: { image: true } },
-        accessories: true,
-        transportationData: true,
-      },
+  async getSpecialOffers(
+    params: PaginationQueryParams,
+    locale: string,
+  ): Promise<ResponseData<GetProductDTO[]> & Metadata> {
+    const query = new URLSearchParams({
+      'filters[discount][$gt]': '0',
+      populate:
+        'images.image,originCountries,images.image,advantages,specs,files.preview,accessories,transportationData',
+      locale: locale,
     });
 
-    const data = products.map(product => this.mapProductToDTO(product));
+    if (params.skip !== undefined) {
+      query.append('pagination[start]', String(params.skip));
+    }
 
-    const totalCount = await this.prismaService.product.count({
-      where: {
-        discount: {
-          gt: 0,
-        },
-      },
-    });
+    if (params.take !== undefined) {
+      query.append('pagination[limit]', String(params.take));
+    }
+
+    const response = await fetch(`${process.env.CMS_DOMAIN}/api/products?${query.toString()}`);
+    const result = await response.json();
+
+    const data = result.data.map((product: any) => this.mapProductToDTO(product));
+    const totalCount = result.meta.pagination.total;
 
     return { data, metadata: { totalCount } };
   }
 
-  async getAggregatedInfo(params: GetAggregatedInfoQueryParams): Promise<ResponseData<AggregatedInfoDTO>> {
-    const products = await this.prismaService.product.findMany({
-      where: {
-        category: CATEGORIES[params.category],
-      },
-      select: {
-        manufacturer: true,
-        weight: true,
-        price: true,
-        color: true,
-      },
+  async getAggregatedInfo(
+    params: GetAggregatedInfoQueryParams,
+    locale: string,
+  ): Promise<ResponseData<AggregatedInfoDTO>> {
+    const query = new URLSearchParams({
+      'filters[category]': CATEGORIES[params.category],
     });
 
-    const manufacturers = [...new Set(products.map(product => product.manufacturer))];
-    const weights = [...new Set(products.map(product => product.weight))];
-    const colors = [...new Set(products.map(product => product.color))];
+    query.append('fields', 'price');
+    query.append('fields', 'manufacturer');
+    query.append('fields', 'weight');
+    query.append('fields', 'color');
+
+    const response = await fetch(`${process.env.CMS_DOMAIN}/api/products?${query.toString()}&locale=${locale}`);
+
+    const result = await response.json();
+    const products = result.data;
+
+    const manufacturers: string[] = [
+      ...new Set(products.map((product: any) => product.attributes.manufacturer)),
+    ] as string[];
+    const weights = [...new Set(products.map((product: any) => product.attributes.weight))] as number[];
+    const colors = [...new Set(products.map((product: any) => product.attributes.color))] as string[];
 
     const priceRange = products.reduce(
-      (range, product) => {
-        if (product.price < range.min) range.min = product.price;
-        if (product.price > range.max) range.max = product.price;
+      (range: { min: number; max: number }, product: any) => {
+        const price = product.attributes.price;
+        if (price < range.min) range.min = price;
+        if (price > range.max) range.max = price;
         return range;
       },
       { min: Infinity, max: -Infinity },
     );
 
-    return { data: { manufacturers, weights, priceRange, colors } };
+    return { data: { priceRange, manufacturers, weights, colors } };
   }
 
-  async getProduct(id: number): Promise<ResponseData<GetProductDTO>> {
-    const product = await this.prismaService.product.findUnique({
-      where: { id },
-      include: {
-        images: true,
-        advantages: true,
-        specs: true,
-        files: { include: { image: true } },
-        accessories: true,
-        transportationData: true,
-      },
-    });
+  async getProduct(id: number, locale: string): Promise<ResponseData<GetProductDTO>> {
+    const response = await fetch(
+      `${process.env.CMS_DOMAIN}/api/products/${id}?populate=images.image,originCountries,advantages,specs,files.preview,accessories,transportationData,localizations.images.image,localizations.originCountries,localizations.advantages,localizations.specs,localizations.files.preview,localizations.accessories,localizations.transportationData`,
+    );
+
+    const result = await response.json();
+    const product = result.data;
 
     if (!product) {
       throw new NotFoundException('Product not found');
     }
 
-    const data = this.mapProductToDTO(product);
+    const localizedProduct =
+      product.attributes.localizations.data.find((localization: any) => localization.attributes.locale === locale) ||
+      product.attributes;
+
+    const data = this.mapProductToDTO(localizedProduct);
 
     return { data };
   }
 
-  async getProducts(params: GetProductsQueryParams): Promise<ResponseData<GetProductDTO[]> & Metadata> {
-    const whereConditions: Prisma.ProductWhereInput = {};
+  async getProducts(params: GetProductsQueryParams, locale: string): Promise<ResponseData<GetProductDTO[]> & Metadata> {
+    const query = new URLSearchParams();
 
     if (params.category) {
-      whereConditions.category = CATEGORIES[params.category];
+      query.append('filters[category]', CATEGORIES[params.category]);
     }
 
     if (params.productType) {
-      whereConditions.productType = {
-        startsWith: params.productType,
-        mode: 'insensitive',
-      };
+      query.append('filters[productType][$startsWith]', params.productType);
     }
 
     if (params.model) {
-      whereConditions.model = {
-        contains: params.model,
-        mode: 'insensitive',
-      };
+      query.append('filters[model][$contains]', params.model);
     }
 
     if (params.manufacturer) {
-      whereConditions.manufacturer = params.manufacturer;
+      query.append('filters[manufacturer]', params.manufacturer);
     }
 
     if (params.priceMin !== undefined && params.priceMax !== undefined) {
-      whereConditions.price = {
-        gte: params.priceMin,
-        lte: params.priceMax,
-      };
+      query.append('filters[price][$gte]', String(params.priceMin));
+      query.append('filters[price][$lte]', String(params.priceMax));
     }
 
     if (params.weightMin !== undefined && params.weightMax !== undefined) {
-      whereConditions.weight = {
-        gte: params.weightMin,
-        lte: params.weightMax,
-      };
+      query.append('filters[weight][$gte]', String(params.weightMin));
+      query.append('filters[weight][$lte]', String(params.weightMax));
     }
 
     if (params.colors) {
       if (Array.isArray(params.colors)) {
-        whereConditions.color = {
-          in: params.colors,
-        };
+        query.append('filters[color][$in]', params.colors.join(','));
       } else {
-        whereConditions.color = params.colors;
+        query.append('filters[color]', params.colors);
       }
     }
 
-    const products = await this.prismaService.product.findMany({
-      where: whereConditions,
-      skip: params.skip,
-      take: params.take,
-      include: {
-        images: true,
-        advantages: true,
-        specs: true,
-        files: { include: { image: true } },
-        accessories: true,
-        transportationData: true,
-      },
-    });
+    if (params.skip !== undefined) {
+      query.append('pagination[start]', String(params.skip));
+    }
 
-    const data = products.map(product => this.mapProductToDTO(product));
+    if (params.take !== undefined) {
+      query.append('pagination[limit]', String(params.take));
+    }
 
-    const totalCount = await this.prismaService.product.count({
-      where: whereConditions,
-    });
+    query.append(
+      'populate',
+      'images.image,originCountries,images.image,advantages,specs,files.preview,accessories,transportationData',
+    );
+
+    const response = await fetch(`${process.env.CMS_DOMAIN}/api/products?${query.toString()}&locale=${locale}`);
+
+    const result = await response.json();
+
+    const data = result.data.map((product: any) => this.mapProductToDTO(product));
+    const totalCount = result.meta.pagination.total;
 
     return { data, metadata: { totalCount } };
   }
 
-  private mapProductToDTO(
-    product: Product & {
-      images: Image[];
-      advantages: Advantage[];
-      specs: Spec[];
-      files: (File & { image: Image })[];
-      accessories: Accessory[];
-      transportationData: Transportation[];
-    },
-  ): GetProductDTO {
+  async getSimilarProducts(
+    productId: number,
+    params: PaginationQueryParams,
+    locale: string,
+  ): Promise<ResponseData<GetProductDTO[]> & Metadata> {
+    const productResponse = await fetch(
+      `${process.env.CMS_DOMAIN}/api/products/${productId}?populate=category,manufacturer`,
+    );
+
+    const productResult = await productResponse.json();
+    const product = productResult.data;
+
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+
+    const attributes = product.attributes;
+
+    const query = new URLSearchParams({
+      '_or[0][filters][category]': attributes.category,
+      '_or[1][filters][manufacturer]': attributes.manufacturer,
+      'filters[id][$ne]': String(productId),
+      locale: locale,
+    });
+
+    if (params.skip !== undefined) {
+      query.append('pagination[start]', String(params.skip));
+    }
+
+    if (params.take !== undefined) {
+      query.append('pagination[limit]', String(params.take));
+    }
+
+    query.append(
+      'populate',
+      'images.image,originCountries,advantages,specs,files.preview,accessories,transportationData',
+    );
+
+    const response = await fetch(`${process.env.CMS_DOMAIN}/api/products?${query.toString()}`);
+
+    const result = await response.json();
+
+    const data = result.data.map((product: any) => this.mapProductToDTO(product));
+    const totalCount = result.meta.pagination.total;
+
+    return { data, metadata: { totalCount } };
+  }
+
+  private mapProductToDTO(product: any): GetProductDTO {
+    const attributes = product.attributes || product;
+
     return {
       id: product.id,
-      category: product.category,
-      productType: product.productType,
-      model: product.model,
-      manufacturer: product.manufacturer,
-      originCountries: product.originCountries,
-      description: product.description,
-      price: product.price,
-      discount: product.discount,
-      weight: product.weight,
-      color: product.color,
-      images: product.images.map(image => ({
+      category: attributes.category,
+      productType: attributes.productType,
+      model: attributes.model,
+      manufacturer: attributes.manufacturer,
+      originCountries: attributes.originCountries.map((country: any) => country.value),
+      description: attributes.description,
+      price: attributes.price,
+      discount: attributes.discount,
+      weight: attributes.weight,
+      color: attributes.color,
+      images: attributes.images.map((image: any) => ({
         id: image.id,
-        url: image.url,
-        priority: image.priority ?? undefined,
+        url: `${process.env.CMS_DOMAIN}${image.image.data.attributes.url}`,
+        priority: image.priority ?? 0,
       })),
-      advantages: product.advantages.map(advantage => ({
+      advantages: attributes.advantages.map((advantage: any) => ({
         id: advantage.id,
-        title: advantage.title,
+        label: advantage.label,
         content: advantage.content,
       })),
-      specs: product.specs.map(spec => ({
+      specs: attributes.specs.map((spec: any) => ({
         id: spec.id,
         spec: spec.spec,
         value: spec.value,
         measurementUnit: spec.measurementUnit ?? undefined,
       })),
-      files: product.files.map(file => ({
+      files: attributes.files.map((file: any) => ({
         id: file.id,
-        label: file.label,
+        title: file.title,
         url: file.url,
-        image: {
-          id: file.image.id,
-          url: file.image.url,
-          priority: file.image.priority ?? undefined,
+        preview: {
+          id: file.preview.data.id,
+          url: `${process.env.CMS_DOMAIN}${file.preview.data.attributes.url}`,
         },
       })),
-      accessories: product.accessories.map(accessory => ({
+      accessories: attributes.accessories.map((accessory: any) => ({
         id: accessory.id,
         name: accessory.name,
         quantity: accessory.quantity ?? undefined,
       })),
-      transportationData: product.transportationData.map(data => ({
+      transportationData: attributes.transportationData.map((data: any) => ({
         id: data.id,
         name: data.name,
         value: data.value,

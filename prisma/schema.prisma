@@ -8,151 +8,15 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
-model Product {
-  id                 Int              @id @default(autoincrement())
-  category           Category
-  productType        String
-  model              String
-  manufacturer       String
-  originCountries    String[]
-  description        String
-  price              Float
-  discount           Float
-  weight             Float            
-  color              String
-  accessories        Accessory[]
-  advantages         Advantage[]
-  files              File[]
-  images             Image[]
-  specs              Spec[]
-  transportationData Transportation[]
-}
-
-model Advantage {
-  id        Int     @id @default(autoincrement())
-  title     String
-  content   String
-  productId Int
-  product   Product @relation(fields: [productId], references: [id])
-}
-
-model Spec {
-  id              Int     @id @default(autoincrement())
-  spec            String
-  value           String
-  measurementUnit String?
-  productId       Int
-  product         Product @relation(fields: [productId], references: [id])
-}
-
-model File {
-  id        Int     @id @default(autoincrement())
-  label     String
-  url       String
-  imageId   Int     @unique
-  productId Int
-  image     Image   @relation(fields: [imageId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
-}
-
-model Accessory {
-  id        Int     @id @default(autoincrement())
-  name      String
-  quantity  Int?
-  productId Int
-  product   Product @relation(fields: [productId], references: [id])
-}
-
-model Transportation {
-  id              Int     @id @default(autoincrement())
-  name            String
-  value           String
-  measurementUnit String?
-  productId       Int
-  product         Product @relation(fields: [productId], references: [id])
-}
-
-model BusinessPremiseContact {
-  id                    Int                    @id @default(autoincrement())
-  label                 String
-  imageId               Int                    @unique
-  address               String
-  phoneNumber           String
-  email                 String?
-  image                 Image                  @relation(fields: [imageId], references: [id])
-  orderPassPhoneNumbers OrderPassPhoneNumber[]
-}
-
-model OrderPassPhoneNumber {
-  id                       Int                    @id @default(autoincrement())
-  phoneNumber              String
-  businessPremiseContactId Int
-  businessPremiseContact   BusinessPremiseContact @relation(fields: [businessPremiseContactId], references: [id])
-}
-
-model DepartmentContact {
-  id                    Int                    @id @default(autoincrement())
-  label                 String
-  phoneNumber           String
-  email                 String
-  extensionPhoneNumbers ExtensionPhoneNumber[]
-}
-
-model ExtensionPhoneNumber {
-  id                  Int               @id @default(autoincrement())
-  phoneNumber         String
-  departmentContactId Int
-  departmentContact   DepartmentContact @relation(fields: [departmentContactId], references: [id])
-}
-
-model DeliveryOption {
-  id          Int    @id @default(autoincrement())
-  type        String
-  label       String
-  price       Float
-  description String
-}
-
-model License {
-  id      Int    @id @default(autoincrement())
-  title   String
-  imageId Int    @unique
-  image   Image  @relation(fields: [imageId], references: [id])
-}
-
 model Tax {
   id    Int    @id @default(autoincrement())
   type  String
   value Float
 }
 
-model Image {
-  id                     Int                     @id @default(autoincrement())
-  url                    String
-  priority               Int?
-  productId              Int?
-  newsItemId             Int?
-  businessPremiseContact BusinessPremiseContact?
-  file                   File?
-  newsItem               News?                   @relation(fields: [newsItemId], references: [id])
-  product                Product?                @relation(fields: [productId], references: [id])
-  license                License?
-}
-
-model PrimaryContact {
-  id          Int    @id(map: "Contact_pkey") @default(autoincrement())
-  label       String
-  address     String
-  phoneNumber String
-  email       String
-}
-
-model News {
-  id      Int      @id(map: "NewsItem_pkey") @default(autoincrement())
-  title   String
-  date    DateTime
-  content String
-  images  Image[]
+model EnumHolder {
+  id       Int      @id @default(autoincrement())
+  category Category
 }
 
 enum Category {
