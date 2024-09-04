@@ -124,7 +124,9 @@ export class ProductService {
 
     if (params.colors) {
       if (Array.isArray(params.colors)) {
-        query.append('filters[color][$in]', params.colors.join(','));
+        params.colors.forEach(color => {
+          query.append('filters[color][$in]', color);
+        });
       } else {
         query.append('filters[color]', params.colors);
       }
