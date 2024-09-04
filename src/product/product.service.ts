@@ -1,8 +1,7 @@
 /* eslint-disable max-len */
 import { Injectable, NotFoundException } from '@nestjs/common';
 
-import { CATEGORIES } from 'src/constants';
-
+import { CATEGORIES } from '../constants';
 import { Metadata, PaginationQueryParams, ResponseData } from '../common';
 import { AggregatedInfoDTO, GetAggregatedInfoQueryParams, GetProductDTO, GetProductsQueryParams } from './dto';
 
